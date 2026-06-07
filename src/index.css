@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  
+  --color-brand-50: #f0f9f9;
+  --color-brand-100: #dcf2f2;
+  --color-brand-200: #bae4e4;
+  --color-brand-300: #89cece;
+  --color-brand-400: #55b2b2;
+  --color-brand-500: #3b9797;
+  --color-brand-600: #2c7a7a;
+  --color-brand-700: #276161;
+  --color-brand-800: #234f4f;
+  --color-brand-900: #214343;
+}
+
+body {
+  @apply bg-brand-50 text-slate-900 font-sans antialiased;
+}
+
+.glass {
+  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl shadow-brand-900/5;
+}
+
+.card-soft {
+  @apply bg-white rounded-2xl border border-brand-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-brand-200;
+}
+
+.heading {
+  @apply font-display font-semibold tracking-tight;
+}
+
+input, select, textarea {
+  @apply bg-white border border-brand-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-sm placeholder:text-slate-400;
+}
+
+input.has-icon, select.has-icon {
+  padding-left: 3rem !important;
+}
+
+button.primary {
+  @apply bg-brand-600 text-white font-medium rounded-xl px-6 py-2.5 hover:bg-brand-700 active:scale-95 transition-all shadow-lg shadow-brand-600/20;
+}
+
+button.secondary {
+  @apply bg-white text-brand-700 border border-brand-200 font-medium rounded-xl px-6 py-2.5 hover:bg-brand-50 hover:border-brand-300 active:scale-95 transition-all;
+}
+
+/* Animations */
+.stagger-in > * {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Scrollbar Styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #bae4e4 transparent;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #bae4e4;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #89cece;
+}
+
