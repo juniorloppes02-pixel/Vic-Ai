@@ -133,9 +133,14 @@ export default function About() {
         <p className="text-slate-400 mb-8 max-w-xl mx-auto">
           Estamos apenas começando nossa jornada para tornar o ensino inclusivo um padrão, não uma exceção.
         </p>
-        <button className="bg-brand-500 hover:bg-brand-400 text-white font-bold px-8 py-4 rounded-2xl flex items-center gap-2 mx-auto transition-all shadow-xl shadow-brand-500/20">
+        <a 
+          href="https://wa.me/5585921589258?text=Ol%C3%A1!%20Estou%20no%20sistema%20da%20Vic%20AI%20e%20gostaria%20de%20acessar%20a%20Central%20de%20Ajuda%20no%20WhatsApp."
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-brand-500 hover:bg-brand-400 text-white font-bold px-8 py-4 rounded-2xl flex items-center gap-2 mx-auto transition-all shadow-xl shadow-brand-500/20 w-fit cursor-pointer"
+        >
           Nossa Central de Ajuda <ChevronRight className="w-5 h-5" />
-        </button>
+        </a>
       </motion.section>
     </div>
   );

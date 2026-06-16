@@ -6,17 +6,21 @@ import {
   Lock, 
   ShieldCheck, 
   ArrowRight, 
-  BrainCircuit, 
+  Bot, 
   BookOpen,
   Loader2,
   CheckCircle2
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import Logo from "../components/Logo";
+import TermsOfUseModal from "../components/TermsOfUseModal";
 
 export default function Register() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,6 +30,15 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      setError("As senhas inseridas não coincidem.");
+      return;
+    }
+    if (!acceptedTerms) {
+      setError("Você precisa ler e aceitar os Termos de Uso e Política de Privacidade para criar uma conta.");
+      return;
+    }
+    setError("");
     setIsLoading(true);
     // Simulação de cadastro
     setTimeout(() => {
@@ -62,7 +75,7 @@ export default function Register() {
             <div className="relative z-10 mt-12 space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                  <BrainCircuit className="w-5 h-5 text-white" />
+                  <Bot className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-sm font-medium">IA especializada em TEA</span>
               </div>
@@ -167,6 +180,34 @@ export default function Register() {
                 </div>
               </div>
 
+              {/* Checkbox de Termos de Uso e LGPD */}
+              <div className="bg-slate-50/70 p-4 border border-slate-100 rounded-2xl flex items-start gap-4 select-none">
+                <input 
+                  id="checkbox-terms"
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => {
+                    setAcceptedTerms(e.target.checked);
+                    if (e.target.checked && (error.includes("Termos de Uso") || error.includes("precisa ler"))) {
+                      setError("");
+                    }
+                  }}
+                  className="w-5 h-5 mt-0.5 rounded-lg border-slate-250 text-brand-600 focus:ring-brand-500 accent-brand-600 cursor-pointer"
+                />
+                <div className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  Declaro que li e concordo inteiramente com os{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="text-brand-650 hover:text-brand-700 font-bold hover:underline font-sans cursor-pointer bg-transparent inline-block p-0 outline-none text-left"
+                  >
+                    Termos de Uso e Diretrizes da LGPD da Vic IA
+                  </button>.
+                </div>
+              </div>
+
+              {error && <p className="text-red-500 text-xs font-medium bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
+
               <div className="pt-4">
                 <button 
                   type="submit" 
@@ -202,6 +243,22 @@ export default function Register() {
           © 2026 Vic AI - O Elo Gentil na Educação
         </p>
       </footer>
+
+      {/* Reusable TermsOfUseModal overlay popup with smooth presentation */}
+      <AnimatePresence>
+        {showTermsModal && (
+          <TermsOfUseModal
+            isOpen={showTermsModal}
+            onClose={() => setShowTermsModal(false)}
+            onAgree={() => {
+              setAcceptedTerms(true);
+              if (error.includes("Termos de Uso") || error.includes("precisa ler")) {
+                setError("");
+              }
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

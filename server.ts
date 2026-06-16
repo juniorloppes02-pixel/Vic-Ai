@@ -38,8 +38,22 @@ const mockSchools = [
 ];
 
 const mockUsers = [
-  { id: "u1", name: "Admin", email: "admin@educaflow.com", type: "ADMIN" },
-  { id: "prof1", name: "Professor Demo", email: "professor@escola.com", type: "PROFESSOR", schoolId: "1" }
+  { id: "u1", name: "Admin", email: "admin@vicai.com", type: "ADMIN" },
+  { 
+    id: "prof1", 
+    name: "Professor Demo", 
+    email: "professor@escola.com", 
+    type: "PROFESSOR", 
+    schoolId: "1",
+    status: "Ativo",
+    phone: "(11) 98765-4321",
+    code: "PRF-2026-98765",
+    employmentType: "Efetivo",
+    modalities: ["Ensino Fundamental", "Educação Especial"],
+    disciplines: ["Matemática", "Português"],
+    classes: ["2º Ano B", "5º Ano A"],
+    notes: "Professor atuando no suporte de alunos com TEA no Ensino Fundamental."
+  }
 ];
 
 const mockStudents = [
@@ -76,7 +90,8 @@ const mockStudents = [
     resourceRoom: "Sim",
     pei: "Sim",
     adaptations: "Uso de abafadores de ruído no refeitório, pistas visuais para transição.",
-    academicHistory: "Cursou o 1º ano com apoio de cuidador e apresentou evolução."
+    academicHistory: "Cursou o 1º ano com apoio de cuidador e apresentou evolução.",
+    lastRpiDate: "2025-11-10"
   },
   {
     id: "s2",
@@ -111,22 +126,165 @@ const mockStudents = [
     resourceRoom: "Sim",
     pei: "Em elaboração",
     adaptations: "Uso de rotina visual e história social para regular comportamento.",
-    academicHistory: "Teve dificuldades na adaptação mas melhorou sua comunicação verbal."
+    academicHistory: "Teve dificuldades na adaptação mas melhorou sua comunicação verbal.",
+    lastRpiDate: "2025-12-28"
   }
 ];
 
-const mockReports: any[] = [];
+const mockReports: any[] = [
+  // Relatórios de Arthur Benicio Silva (s1)
+  {
+    id: "r1",
+    studentId: "s1",
+    date: "2026-03-10",
+    behavior: "Calmo",
+    participation: "Ativo",
+    progress: "Evoluindo",
+    difficulties: "Distração leve com ruído",
+    crises: "Não",
+    reading: "Bom",
+    writing: "Regular",
+    logic: "Bom",
+    pendingTasks: "Nenhuma"
+  },
+  {
+    id: "r2",
+    studentId: "s1",
+    date: "2026-04-12",
+    behavior: "Calmo",
+    participation: "Muito Ativo",
+    progress: "Evoluindo",
+    difficulties: "Foco inicial curto",
+    crises: "Não",
+    reading: "Bom",
+    writing: "Bom",
+    logic: "Bom",
+    pendingTasks: "Nenhuma"
+  },
+  {
+    id: "r3",
+    studentId: "s1",
+    date: "2026-05-15",
+    behavior: "Muito Calmo",
+    participation: "Muito Ativo",
+    progress: "Evoluindo Excelente",
+    difficulties: "Nenhuma",
+    crises: "Não",
+    reading: "Ótimo",
+    writing: "Bom",
+    logic: "Ótimo",
+    pendingTasks: "Nenhuma"
+  },
+
+  // Relatórios de Julia Costa (s2)
+  {
+    id: "r4",
+    studentId: "s2",
+    date: "2026-03-05",
+    behavior: "Agitado",
+    participation: "Passivo",
+    progress: "Estável",
+    difficulties: "Choro nas transições de atividades e quebra de rotina",
+    crises: "Sim",
+    reading: "Regular",
+    writing: "Regular",
+    logic: "Regular",
+    pendingTasks: "2 lições"
+  },
+  {
+    id: "r5",
+    studentId: "s2",
+    date: "2026-04-08",
+    behavior: "Calmo",
+    participation: "Ativo",
+    progress: "Evoluindo",
+    difficulties: "Hipersensibilidade auditiva pontual no refeitório",
+    crises: "Não",
+    reading: "Bom",
+    writing: "Regular",
+    logic: "Bom",
+    pendingTasks: "1 lição"
+  },
+  {
+    id: "r6",
+    studentId: "s2",
+    date: "2026-05-12",
+    behavior: "Calmo",
+    participation: "Ativo",
+    progress: "Evoluindo",
+    difficulties: "Demanda por apoios visuais mais frequentes",
+    crises: "Não",
+    reading: "Bom",
+    writing: "Bom",
+    logic: "Bom",
+    pendingTasks: "Nenhuma"
+  }
+];
 const mockLessonPlans: any[] = [];
 const mockFeedbacks: any[] = [];
 const mockAuditLogs = [
   { id: "a1", user: "Administrador EducaFlow", action: "LOGIN", date: new Date().toISOString() }
 ];
 
+const securityMetrics = {
+  totalErrors: 14,
+  criticalErrors: 1,
+  errorsByModule: {
+    "Autenticação": 2,
+    "Fichas de Alunos": 3,
+    "Chat Vic IA": 5,
+    "Relatórios RPI": 3,
+    "Backups & Supabase": 1
+  } as Record<string, number>,
+  responseTimes: [115, 125, 95, 210, 180, 130, 140, 110, 85, 160] as number[],
+  aiConsumption: {
+    totalPrompts: 342,
+    totalTokens: 489500,
+  },
+  suspiciousAccessAttempts: [
+    { id: "sa-1", ip: "185.xx.xx.xx", location: "Suíça (Tor Exit)", date: new Date(Date.now() - 1000 * 60 * 35).toISOString(), reason: "[FALHAS] Tentativa de força bruta no login de administrador", severity: "HIGH" },
+    { id: "sa-2", ip: "45.xx.xx.xx", location: "Rússia (VPN)", date: new Date(Date.now() - 1000 * 60 * 180).toISOString(), reason: "[SQLi] Injeção SQL detectada nos filtros de busca de alunos", severity: "CRITICAL" },
+    { id: "sa-3", ip: "92.xx.xx.xx", location: "Espanha (Proxy)", date: new Date(Date.now() - 1000 * 60 * 360).toISOString(), reason: "[ROTAS] Tentativa de varredura ativa de pastas (/wp-admin, /.git)", severity: "MEDIUM" }
+  ] as any[]
+};
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
   app.use(express.json());
+
+  // Middleware for active security tracking
+  app.use((req, res, next) => {
+    const start = Date.now();
+    res.on("finish", () => {
+      const duration = Date.now() - start;
+      if (!req.path.includes("security-dashboard") && !req.path.includes("static") && !req.path.includes("assets")) {
+        securityMetrics.responseTimes.push(duration);
+        if (securityMetrics.responseTimes.length > 50) {
+          securityMetrics.responseTimes.shift();
+        }
+      }
+      
+      // Track actual errors
+      if (res.statusCode >= 400 && !req.path.includes("static")) {
+        securityMetrics.totalErrors++;
+        let module = "Outros";
+        if (req.path.includes("auth")) module = "Autenticação";
+        else if (req.path.includes("students")) module = "Fichas de Alunos";
+        else if (req.path.includes("plans") || req.path.includes("ai-consumption")) module = "Chat Vic IA";
+        else if (req.path.includes("reports")) module = "Relatórios RPI";
+        else if (req.path.includes("backups")) module = "Backups & Supabase";
+        
+        securityMetrics.errorsByModule[module] = (securityMetrics.errorsByModule[module] || 0) + 1;
+        
+        if (res.statusCode >= 500) {
+          securityMetrics.criticalErrors++;
+        }
+      }
+    });
+    next();
+  });
 
   // Helper for safe supabase calls
   const safeQuery = async (queryPromise: Promise<any>, fallback: any = []) => {
@@ -155,7 +313,7 @@ async function startServer() {
     const { email } = req.body;
     
     // Static fallback logins for demo
-    if (email === "admin@educaflow.com") {
+    if (email === "admin@vicai.com") {
       return res.json({ user: { id: "admin", name: "Administrador", email, type: "ADMIN", schoolId: null } });
     }
     
@@ -304,30 +462,42 @@ async function startServer() {
   });
 
   app.post("/api/admin/users", async (req, res) => {
-    const userObj = {
-      id: req.body.id || Math.random().toString(),
+    const userObj: any = {
       name: req.body.name,
       email: req.body.email,
       type: req.body.type || "PROFESSOR",
-      schoolId: req.body.schoolId === "" ? null : req.body.schoolId
+      schoolId: req.body.schoolId === "" ? null : req.body.schoolId,
+      phone: req.body.phone,
+      code: req.body.code,
+      employmentType: req.body.employmentType,
+      modalities: req.body.modalities || [],
+      disciplines: req.body.disciplines || [],
+      classes: req.body.classes || [],
+      notes: req.body.notes,
+      status: req.body.status || "Ativo"
     };
+    if (req.body.id) {
+      userObj.id = req.body.id;
+    }
 
     if (!supabase) {
-      mockUsers.push(userObj);
+      const fallbackUser = { ...userObj, id: userObj.id || `u-${Math.floor(Math.random() * 100000)}` };
+      mockUsers.push(fallbackUser);
       mockAuditLogs.push({
-        id: Math.random().toString(),
+        id: `audit-${Math.floor(Math.random() * 100000)}`,
         user: "Administrador EducaFlow",
         action: `CRIOU PROFESSOR: ${userObj.name}`,
         date: new Date().toISOString()
       });
-      return res.json(userObj);
+      return res.json(fallbackUser);
     }
 
     const { data, error } = await supabase.from('users').insert([userObj]).select();
     if (error) {
       console.warn("Supabase user insert failed, using fallback mock memory storage:", error.message);
-      mockUsers.push(userObj);
-      return res.json(userObj);
+      const fallbackUser = { ...userObj, id: userObj.id || `u-${Math.floor(Math.random() * 100000)}` };
+      mockUsers.push(fallbackUser);
+      return res.json(fallbackUser);
     }
 
     try {
@@ -558,6 +728,17 @@ async function startServer() {
   });
 
   // Reports
+  app.get("/api/admin/reports", async (req, res) => {
+    if (!supabase) {
+      return res.json(mockReports);
+    }
+    const { data, error } = await supabase.from('reports').select('*');
+    if (error || !data) {
+      return res.json(mockReports);
+    }
+    res.json(data);
+  });
+
   app.get("/api/admin/reports/student/:id", async (req, res) => {
     if (!supabase) {
       return res.json(mockReports.filter(r => r.studentId === req.params.id));
@@ -612,6 +793,7 @@ async function startServer() {
   // Feedbacks
   app.post("/api/feedbacks", async (req, res) => {
     const feedbackObj = { ...req.body, id: req.body.id || Math.random().toString(), date: new Date().toISOString() };
+    
     if (!supabase) {
       mockFeedbacks.push(feedbackObj);
       return res.json(feedbackObj);
@@ -636,6 +818,40 @@ async function startServer() {
     res.json(data);
   });
 
+  // POST /api/admin/ai-consumption
+  app.post("/api/admin/ai-consumption", (req, res) => {
+    const { promptTokens, responseTokens } = req.body;
+    securityMetrics.aiConsumption.totalPrompts++;
+    securityMetrics.aiConsumption.totalTokens += (Number(promptTokens) + Number(responseTokens)) || 1850;
+    res.json({ success: true, aiConsumption: securityMetrics.aiConsumption });
+  });
+
+  // GET /api/admin/security-dashboard
+  app.get("/api/admin/security-dashboard", (req, res) => {
+    const validTimes = securityMetrics.responseTimes.filter(t => typeof t === "number" && !isNaN(t));
+    const avgResponseTime = validTimes.length > 0 
+      ? Math.round(validTimes.reduce((a, b) => a + b, 0) / validTimes.length)
+      : 135;
+
+    const statusOfServices = {
+      database: supabase ? "OPERATIONAL" : "DEGRADED",
+      geminiApi: "OPERATIONAL", // Static set to OPERATIONAL or based on key existence
+      backupService: "OPERATIONAL",
+      pdfGenerator: "OPERATIONAL"
+    };
+
+    res.json({
+      totalErrors: securityMetrics.totalErrors,
+      criticalErrors: securityMetrics.criticalErrors,
+      errorsByModule: securityMetrics.errorsByModule,
+      averageResponseTime: avgResponseTime || 135,
+      responseTimes: securityMetrics.responseTimes,
+      aiConsumption: securityMetrics.aiConsumption,
+      suspiciousAccessAttempts: securityMetrics.suspiciousAccessAttempts,
+      servicesStatus: statusOfServices
+    });
+  });
+
   // Export (returning json for simulation)
   app.get("/api/admin/export/students", async (req, res) => {
     if (!supabase) return res.json(mockStudents);
@@ -645,6 +861,146 @@ async function startServer() {
     }
     res.json(data);
   });
+
+  // --- Automatic & Manual Backups Management ---
+  const mockBackups: any[] = [];
+
+  const runBackup = async (triggerType: "AUTOMATIC" | "MANUAL") => {
+    try {
+      console.log(`[Backup System] Initiating ${triggerType} backup routine...`);
+      
+      // 1. Fetch Students
+      let studentsList = [...mockStudents];
+      if (supabase) {
+        const { data } = await supabase.from('students').select('*');
+        if (data && data.length > 0) studentsList = data;
+      }
+
+      // 2. Fetch Teachers (type = PROFESSOR)
+      let teachersList = mockUsers.filter(u => u.type === 'PROFESSOR');
+      if (supabase) {
+        const { data } = await supabase.from('users').select('*').eq('type', 'PROFESSOR');
+        if (data && data.length > 0) teachersList = data;
+      }
+
+      // 3. Fetch RPI Reports
+      let reportsList = [...mockReports];
+      if (supabase) {
+        const { data } = await supabase.from('reports').select('*');
+        if (data && data.length > 0) reportsList = data;
+      }
+
+      const now = new Date();
+      const backupRecord = {
+        id: "bk-" + Math.random().toString(36).substring(2, 11),
+        date: now.toISOString(),
+        status: "SUCCESS",
+        triggerType,
+        recordsCount: {
+          students: studentsList.length,
+          teachers: teachersList.length,
+          reports: reportsList.length,
+        },
+        summary: `${studentsList.length} aluno(s), ${teachersList.length} professor(es) e ${reportsList.length} relatório(s) RPI arquivados eletronicamente.`,
+        payload: JSON.stringify({
+          students: studentsList,
+          teachers: teachersList,
+          reports: reportsList,
+          timestamp: now.toISOString(),
+        }),
+        storageLocation: "IN_MEMORY_FALLBACK",
+        errorMessage: null
+      };
+
+      if (supabase) {
+        try {
+          const { error } = await supabase.from('backups').insert([backupRecord]);
+          if (!error) {
+            backupRecord.storageLocation = "SUPABASE_DB";
+            console.log(`[Backup System] Backup successfully persisted to Supabase.`);
+          } else {
+            console.warn(`[Backup System] Supabase insert failed: 'backups' table might not exist yet. Error: ${error.message}`);
+          }
+        } catch (supabaseErr: any) {
+          console.warn(`[Backup System] Supabase connection failed: ${supabaseErr.message}`);
+        }
+      }
+
+      mockBackups.unshift(backupRecord);
+
+      // Log backup event in audit trail
+      const auditRecord = {
+        id: "a-" + Math.random().toString(36).substring(2, 11),
+        user: triggerType === "AUTOMATIC" ? "Rotina Automática Vic IA" : "Administrador",
+        action: triggerType === "AUTOMATIC" ? "BACKUP_AUTOMATIC" : "BACKUP_MANUAL",
+        date: now.toISOString()
+      };
+
+      if (supabase) {
+        await supabase.from('audit_logs').insert([auditRecord]).catch(() => {});
+      }
+      mockAuditLogs.unshift(auditRecord);
+
+      console.log(`[Backup System] ${triggerType} backup completed: ${backupRecord.summary}`);
+      return backupRecord;
+    } catch (err: any) {
+      console.error("[Backup System] Critical error during backup routine:", err);
+      const now = new Date();
+      const failedRecord = {
+        id: "bk-" + Math.random().toString(36).substring(2, 11),
+        date: now.toISOString(),
+        status: "FAILED",
+        triggerType,
+        recordsCount: { students: 0, teachers: 0, reports: 0 },
+        summary: "Erro ao gerar ou salvar o arquivo de backup dos dados.",
+        payload: "",
+        storageLocation: "IN_MEMORY_FALLBACK",
+        errorMessage: err.message || String(err)
+      };
+      mockBackups.unshift(failedRecord);
+      return failedRecord;
+    }
+  };
+
+  // Schedule background backups routine - Every 12 hours (12 * 60 * 60 * 1000)
+  const TWELVE_HOURS = 12 * 60 * 60 * 1000;
+  setInterval(() => {
+    runBackup("AUTOMATIC").catch(err => console.error("Error running scheduled backup:", err));
+  }, TWELVE_HOURS);
+
+  // Trigger an initial automatic seed backup on server startup (after 3 seconds) for instant feedback
+  setTimeout(() => {
+    console.log("[Backup System] Triggering initial startup auto-backup...");
+    runBackup("AUTOMATIC").catch(err => console.error("Error in initial startup backup:", err));
+  }, 3000);
+
+  // GET /api/admin/backups
+  app.get("/api/admin/backups", async (req, res) => {
+    if (supabase) {
+      try {
+        const { data, error } = await supabase.from('backups').select('*').order('date', { ascending: false });
+        if (!error && data && data.length > 0) {
+          const combined = [...data];
+          mockBackups.forEach(mb => {
+            if (!combined.some(c => c.id === mb.id)) {
+              combined.push(mb);
+            }
+          });
+          return res.json(combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+        }
+      } catch (dbErr) {
+        // Fall back to memory list
+      }
+    }
+    res.json(mockBackups);
+  });
+
+  // POST /api/admin/backups
+  app.post("/api/admin/backups", async (req, res) => {
+    const record = await runBackup("MANUAL");
+    res.json(record);
+  });
+
 
   // --- Vite / Static Assets ---
 

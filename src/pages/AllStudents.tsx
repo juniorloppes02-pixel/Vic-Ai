@@ -47,12 +47,18 @@ export default function AllStudents() {
   }, []);
 
   const filteredStudents = students.filter(s => {
-    const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.code.toLowerCase().includes(searchTerm.toLowerCase());
+    const sName = s.name || "";
+    const sCode = s.code || "";
+    const sTeaLevel = s.teaLevel || "";
+
+    const matchesSearch = sName.toLowerCase().includes(searchTerm.toLowerCase()) || sCode.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSchool = !filterSchool || s.schoolId === filterSchool;
-    const matchesLevel = !filterLevel || s.teaLevel.includes(filterLevel);
+    const matchesLevel = !filterLevel || sTeaLevel.includes(filterLevel);
     
     // Index / restrict students to the logged-in field if user type is PROFESSOR
-    const matchesTeacher = user?.type !== "PROFESSOR" || s.teacherId === user.id || s.teacherName === user.name;
+    const isTeacherOfStudent = s.teacherId === user?.id || (s.teacherName && user?.name && s.teacherName === user.name);
+    const residesInSameSchool = !!(user?.schoolId && s.schoolId === user.schoolId);
+    const matchesTeacher = user?.type !== "PROFESSOR" || isTeacherOfStudent || residesInSameSchool;
     
     return matchesSearch && matchesSchool && matchesLevel && matchesTeacher;
   });

@@ -1,6 +1,8 @@
 export enum UserType {
   ADMIN = "ADMIN",
+  COORDENADOR = "COORDENADOR",
   PROFESSOR = "PROFESSOR",
+  SECRETARIA = "SECRETARIA",
 }
 
 export interface User {
@@ -57,6 +59,7 @@ export interface Student {
   condition?: "TEA" | "TDAH" | "TEA + TDAH";
   adhdSubtype?: string;
   adhdIntensity?: string;
+  lastRpiDate?: string;
 }
 
 export interface Report {
@@ -108,3 +111,20 @@ export interface Feedback {
   message: string;
   date: string;
 }
+
+export interface BackupLog {
+  id: string;
+  date: string;
+  status: "SUCCESS" | "FAILED";
+  triggerType: "AUTOMATIC" | "MANUAL";
+  recordsCount: {
+    students: number;
+    teachers: number;
+    reports: number;
+  };
+  summary: string;
+  payload: string; // JSON containing full data
+  storageLocation: "SUPABASE_DB" | "IN_MEMORY_FALLBACK";
+  errorMessage: string | null;
+}
+

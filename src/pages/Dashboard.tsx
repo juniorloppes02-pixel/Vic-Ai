@@ -4,7 +4,7 @@ import {
   School as SchoolIcon, 
   Baby, 
   TrendingUp, 
-  BrainCircuit,
+  Bot,
   Plus,
   ArrowUpRight,
   MapPin
@@ -40,7 +40,7 @@ export default function Dashboard() {
   const stats = [
     { label: "Total de Alunos", value: data?.totalStudents || 0, icon: Baby, color: "text-blue-600", bg: "bg-blue-50" },
     { label: "Professores", value: data?.totalTeachers || 0, icon: Users, color: "text-brand-600", bg: "bg-brand-50" },
-    { label: "Planos IA", value: data?.totalPlans || 0, icon: BrainCircuit, color: "text-purple-600", bg: "bg-purple-50" },
+    { label: "Planos IA", value: data?.totalPlans || 0, icon: Bot, color: "text-purple-600", bg: "bg-purple-50" },
     { label: "Escolas", value: data?.totalSchools || 0, icon: SchoolIcon, color: "text-emerald-600", bg: "bg-emerald-50" },
   ];
 
@@ -67,11 +67,11 @@ export default function Dashboard() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl heading text-slate-900">Olá, {user?.name.split(' ')[0]} 👋</h2>
+          <h2 className="text-3xl heading text-slate-900">Olá, {user?.name ? user.name.split(' ')[0] : "Professor"} 👋</h2>
           <p className="text-slate-500 font-medium mt-1">Veja o que está acontecendo na rede hoje.</p>
         </div>
         <div className="flex items-center gap-3">
-          {user?.type === UserType.ADMIN && (
+          {(user?.type === UserType.ADMIN || user?.type === UserType.COORDENADOR || user?.type === UserType.SECRETARIA) && (
             <Link to="/teachers/new" className="secondary flex items-center gap-2 !py-2.5">
               <Plus className="w-5 h-5 text-brand-600" />
               Novo Professor
@@ -168,11 +168,11 @@ export default function Dashboard() {
                       <td className="py-4 text-sm font-medium text-slate-500">{recentSchools.find(s => s.id === student.schoolId)?.name}</td>
                       <td className="py-4">
                         <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                          student.teaLevel.includes('1') ? 'bg-emerald-50 text-emerald-600' :
-                          student.teaLevel.includes('2') ? 'bg-amber-50 text-amber-600' :
+                          (student.teaLevel || "").includes('1') ? 'bg-emerald-50 text-emerald-600' :
+                          (student.teaLevel || "").includes('2') ? 'bg-amber-50 text-amber-600' :
                           'bg-red-50 text-red-600'
                         }`}>
-                          {student.teaLevel}
+                          {student.teaLevel || "Não Definido"}
                         </span>
                       </td>
                       <td className="py-4">
@@ -197,7 +197,7 @@ export default function Dashboard() {
               "Olá! Eu analisei os novos cadastros. Sugiro adaptar o plano do aluno Arthur com foco em estímulos visuais."
             </p>
             <button className="w-full bg-white text-brand-900 font-bold py-3 rounded-xl hover:bg-brand-50 transition-all flex items-center justify-center gap-2">
-              <BrainCircuit className="w-5 h-5" />
+              <Bot className="w-5 h-5" />
               Falar com Vic
             </button>
           </div>

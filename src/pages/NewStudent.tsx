@@ -12,7 +12,7 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   AlertCircle,
-  BrainCircuit,
+  Bot,
   Loader2,
   FileText,
   Upload,
@@ -76,7 +76,8 @@ export default function NewStudent() {
     teacherId: "",
     condition: "TEA",
     adhdSubtype: "Misto (Combinado)",
-    adhdIntensity: "Moderado"
+    adhdIntensity: "Moderado",
+    lastRpiDate: ""
   });
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,8 +121,8 @@ export default function NewStudent() {
     } else if (user) {
       setFormData(prev => ({
         ...prev,
-        teacherName: user.name,
-        teacherId: user.id
+        teacherName: user?.name || "",
+        teacherId: user?.id || ""
       }));
     }
   }, [user, editingStudent]);
@@ -217,7 +218,7 @@ export default function NewStudent() {
             disabled={isGeneratingPlan || currentStep < 4}
             className="secondary flex items-center gap-2 disabled:opacity-50"
           >
-            {isGeneratingPlan ? <Loader2 className="w-5 h-5 animate-spin" /> : <BrainCircuit className="w-5 h-5 text-brand-600" />}
+            {isGeneratingPlan ? <Loader2 className="w-5 h-5 animate-spin" /> : <Bot className="w-5 h-5 text-brand-600" />}
             Gerar Plano com Vic IA
           </button>
           <button 
@@ -335,6 +336,10 @@ export default function NewStudent() {
                   <div>
                     <label className="label">Tempo de Matrícula</label>
                     <input name="enrolmentTime" value={formData.enrolmentTime} onChange={handleChange} className="w-full" placeholder="Ex: 2 anos" />
+                  </div>
+                  <div>
+                    <label className="label">Último RPI (opcional)</label>
+                    <input type="date" name="lastRpiDate" value={formData.lastRpiDate || ""} onChange={handleChange} className="w-full text-slate-700 font-medium" />
                   </div>
                 </div>
               </div>
@@ -649,7 +654,7 @@ export default function NewStudent() {
                   <p className="text-xs text-brand-600 font-medium">Posso gerar um plano personalizado agora.</p>
                 </div>
                 <button onClick={handleGeneratePlan} disabled={isGeneratingPlan} className="primary flex items-center gap-2">
-                  {isGeneratingPlan ? <Loader2 className="w-5 h-5 animate-spin" /> : <BrainCircuit className="w-5 h-5" />}
+                  {isGeneratingPlan ? <Loader2 className="w-5 h-5 animate-spin" /> : <Bot className="w-5 h-5" />}
                   Gerar Plano IA
                 </button>
               </div>
@@ -659,7 +664,7 @@ export default function NewStudent() {
           {currentStep === 5 && (
             <div className="space-y-6">
               <div className="bg-brand-900 text-white p-8 rounded-3xl relative overflow-hidden">
-                <BrainCircuit className="absolute -top-10 -right-10 w-48 h-48 text-brand-500/10" />
+                <Bot className="absolute -top-10 -right-10 w-48 h-48 text-brand-500/10" />
                 <h3 className="text-2xl heading mb-2 text-white">Plano Pedagógico Vic IA</h3>
                 <p className="text-brand-100 text-sm font-medium mb-6">Criado especificamente para {formData.name}</p>
                 

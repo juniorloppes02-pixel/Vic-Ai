@@ -13,10 +13,13 @@ import {
   Sparkles,
   Building,
   RefreshCw,
-  Info
+  Info,
+  FileDown
 } from "lucide-react";
 import { School } from "../types";
 import { motion, AnimatePresence } from "motion/react";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const steps = [
   { id: 1, title: "Dados Gerais", subtitle: "Pessoais e vínculo", icon: User },
@@ -75,12 +78,209 @@ export default function NewTeacher() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [teachersList, setTeachersList] = useState<any[]>([]);
+  const [selectedIndividualTeacherId, setSelectedIndividualTeacherId] = useState<string>("current");
+
+  const handleExportAllTeachers = async () => {
+    try {
+      const res = await fetch("/api/admin/users");
+      const usersData = await res.json();
+      const teachers = Array.isArray(usersData) 
+        ? usersData.filter(u => u.type === "PROFESSOR" || u.accessProfile === "Professor") 
+        : [];
+
+      if (teachers.length === 0) {
+        alert("Nenhum professor cadastrado encontrado no sistema.");
+        return;
+      }
+
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Title
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.setTextColor(44, 122, 122); // Teal brand color
+      doc.text("Relatório Geral de Professores Cadastrados", 14, 25);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(148, 163, 184); // slate-400
+      const currentDate = new Date().toLocaleDateString("pt-BR");
+      const currentTime = new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+      doc.text(`Documento gerado em: ${currentDate} às ${currentTime}`, 14, 32);
+
+      const tableColumn = ["Matrícula", "Nome", "E-mail", "Vínculo", "Escola"];
+      const tableRows = teachers.map(t => {
+        const schoolName = t.schoolId 
+          ? (schools.find(s => s.id === t.schoolId)?.name || "Escola não encontrada") 
+          : "Secretaria Municipal";
+        return [
+          t.code || "N/A",
+          t.name,
+          t.email,
+          t.employmentType || "Efetivo",
+          schoolName
+        ];
+      });
+
+      autoTable(doc, {
+        startY: 40,
+        head: [tableColumn],
+        body: tableRows,
+        theme: "striped",
+        headStyles: { fillColor: [44, 122, 122], fontStyle: "bold" },
+        styles: { fontSize: 9, cellPadding: 4 },
+        columnStyles: {
+          0: { fontStyle: "bold", cellWidth: 35 },
+          1: { cellWidth: 50 },
+          2: { cellWidth: 50 },
+          3: { cellWidth: 25 },
+          4: { cellWidth: 30 }
+        },
+        margin: { left: 14, right: 14 }
+      });
+
+      doc.save(`relatorio_professores_geral_${new Date().toISOString().slice(0, 10)}.pdf`);
+      setShowExportModal(false);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao exportar relatório de professores.");
+    }
+  };
+
+  const handleExportIndividualTeacher = () => {
+    const teacherToExport = selectedIndividualTeacherId === "current"
+      ? formData
+      : (teachersList.find(t => String(t.id) === String(selectedIndividualTeacherId)) || formData);
+
+    if (!teacherToExport.name || !teacherToExport.name.trim()) {
+      alert("Por favor, selecione um professor com um nome válido antes de exportar o relatório individual.");
+      return;
+    }
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Custom design with header accent band
+    doc.setFillColor(44, 122, 122); // brand teal
+    doc.rect(0, 0, pageWidth, 15, "F");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(44, 122, 122);
+    doc.text("FICHA CADASTRAL DO PROFESSOR", 14, 32);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(148, 163, 184); // slate-400
+    const currentDate = new Date().toLocaleDateString("pt-BR");
+    const currentTime = new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+    doc.text(`Documento gerado em: ${currentDate} às ${currentTime}`, 14, 39);
+
+    // Section 1: Dados Pessoais e Funcionais
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(15, 23, 42); // slate-900
+    doc.text("1. Informações Gerais e do Vínculo", 14, 52);
+    
+    // Draw horizontal line
+    doc.setDrawColor(226, 232, 240); // slate-200
+    doc.line(14, 55, pageWidth - 14, 55);
+
+    const schoolName = teacherToExport.schoolId 
+      ? (schools.find(s => String(s.id) === String(teacherToExport.schoolId))?.name || "Escola não encontrada") 
+      : "Não especificado";
+
+    // Build data table for general details
+    const detailRows = [
+      ["Nome Completo:", teacherToExport.name, "Status:", teacherToExport.status || "Ativo"],
+      ["E-mail:", teacherToExport.email || "Não informado", "Telefone:", teacherToExport.phone || "Não informado"],
+      ["Matrícula/Código:", teacherToExport.code || "Não gerado", "Vínculo:", teacherToExport.employmentType || "Não informado"],
+      ["Escola Vinculada:", schoolName, "Perfil de Acesso:", teacherToExport.accessProfile || teacherToExport.type || "Professor"]
+    ];
+
+    autoTable(doc, {
+      startY: 58,
+      body: detailRows,
+      theme: "plain",
+      styles: { fontSize: 9.5, cellPadding: 3.5 },
+      columnStyles: {
+        0: { fontStyle: "bold", cellWidth: 35, textColor: [71, 85, 105] },
+        1: { cellWidth: 60, textColor: [15, 23, 42] },
+        2: { fontStyle: "bold", cellWidth: 35, textColor: [71, 85, 105] },
+        3: { cellWidth: 60, textColor: [15, 23, 42] }
+      },
+      margin: { left: 14, right: 14 }
+    });
+
+    let currentY = (doc as any).lastAutoTable.finalY + 12;
+
+    // Section 2: Foco Acadêmico
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(15, 23, 42);
+    doc.text("2. Atuação e Foco Acadêmico", 14, currentY);
+    doc.line(14, currentY + 3, pageWidth - 14, currentY + 3);
+    currentY += 6;
+
+    const academicRows = [
+      ["Modalidades de Ensino:", (teacherToExport.modalities && teacherToExport.modalities.length > 0) ? teacherToExport.modalities.join(", ") : "Nenhuma selecionada"],
+      ["Disciplinas Lecionadas:", (teacherToExport.disciplines && teacherToExport.disciplines.length > 0) ? teacherToExport.disciplines.join(", ") : "Nenhuma selecionada"],
+      ["Turmas Atribuídas:", (teacherToExport.classes && teacherToExport.classes.length > 0) ? teacherToExport.classes.join(", ") : "Nenhuma selecionada"]
+    ];
+
+    autoTable(doc, {
+      startY: currentY,
+      body: academicRows,
+      theme: "striped",
+      styles: { fontSize: 9.5, cellPadding: 4 },
+      columnStyles: {
+        0: { fontStyle: "bold", cellWidth: 45, textColor: [71, 85, 105] },
+        1: { cellWidth: 145, textColor: [15, 23, 42] }
+      },
+      margin: { left: 14, right: 14 }
+    });
+
+    currentY = (doc as any).lastAutoTable.finalY + 12;
+
+    // Section 3: Observações
+    if (teacherToExport.notes) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(15, 23, 42);
+      doc.text("3. Observações e Anotações Gerais", 14, currentY);
+      doc.line(14, currentY + 3, pageWidth - 14, currentY + 3);
+      currentY += 8;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(51, 65, 85);
+      
+      const splitNotes = doc.splitTextToSize(teacherToExport.notes, pageWidth - 28);
+      doc.text(splitNotes, 14, currentY);
+    }
+
+    doc.save(`ficha_professor_${teacherToExport.name.toLowerCase().replace(/\s+/g, "_")}.pdf`);
+    setShowExportModal(false);
+  };
 
   useEffect(() => {
     fetch("/api/admin/schools")
       .then(res => res.json())
       .then(data => setSchools(Array.isArray(data) ? data : []))
       .catch(() => setSchools([]));
+
+    fetch("/api/admin/users")
+      .then(res => res.json())
+      .then(data => {
+        const list = Array.isArray(data) 
+          ? data.filter(u => u.type === "PROFESSOR" || u.accessProfile === "Professor") 
+          : [];
+        setTeachersList(list);
+      })
+      .catch(() => setTeachersList([]));
 
     if (editingUser) {
       setFormData({
@@ -95,7 +295,7 @@ export default function NewTeacher() {
         disciplines: editingUser.disciplines || [],
         classes: editingUser.classes || [],
         notes: editingUser.notes || "",
-        accessProfile: editingUser.accessProfile || editingUser.type || "Professor",
+        accessProfile: editingUser.accessProfile || (editingUser.type === "ADMIN" ? "Coordenador" : editingUser.type === "COORDENADOR" ? "Coordenador" : editingUser.type === "SECRETARIA" ? "Secretaria" : "Professor"),
         password: "",
         confirmPassword: "",
         termAccepted: true
@@ -189,9 +389,6 @@ export default function NewTeacher() {
           newErrors.confirmPassword = "As senhas não coincidem";
         }
       }
-      if (!formData.termAccepted) {
-        newErrors.termAccepted = "Você deve aceitar o Termo de Sigilo e Responsabilidade";
-      }
     }
 
     setErrors(newErrors);
@@ -217,7 +414,11 @@ export default function NewTeacher() {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        type: formData.accessProfile === "Coordenador" ? "ADMIN" : "PROFESSOR",
+        type: formData.accessProfile === "Coordenador" 
+          ? "COORDENADOR" 
+          : formData.accessProfile === "Secretaria" 
+            ? "SECRETARIA" 
+            : "PROFESSOR",
         schoolId: formData.schoolId,
         code: formData.code,
         employmentType: formData.employmentType,
@@ -258,7 +459,7 @@ export default function NewTeacher() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate("/users")} 
@@ -267,12 +468,20 @@ export default function NewTeacher() {
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div>
-            <h2 className="text-3xl heading text-slate-900">{editingUser ? "Editar Usuário" : "Novo Professor"}</h2>
+            <h2 className="text-3xl heading text-slate-900">{editingUser ? "Editar Usuário" : "Novo Usuário"}</h2>
             <p className="text-slate-500 font-medium mt-1">
-              {editingUser ? "Atualize os dados do usuário docente ou coordenador no sistema." : "Preencha os dados abaixo para cadastrar um docente ou coordenador no sistema."}
+              {editingUser ? "Atualize os dados do usuário docente, coordenador ou secretaria no sistema." : "Preencha os dados abaixo para cadastrar um docente, coordenador ou secretaria no sistema."}
             </p>
           </div>
         </div>
+        <button
+          id="btn-export-pdf-teacher"
+          onClick={() => setShowExportModal(true)}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-colors shadow-sm self-start sm:self-center"
+        >
+          <FileDown className="w-5 h-5 text-slate-500" />
+          Exportar PDF
+        </button>
       </div>
 
       {/* Step Indicators */}
@@ -638,8 +847,8 @@ export default function NewTeacher() {
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">
                       Perfil de Acesso *
                     </label>
-                    <div className="grid grid-cols-2 gap-4">
-                      {["Professor", "Coordenador"].map(profile => {
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {["Professor", "Coordenador", "Secretaria"].map(profile => {
                         const isSelected = formData.accessProfile === profile;
                         return (
                           <div
@@ -705,36 +914,6 @@ export default function NewTeacher() {
                     {errors.confirmPassword && <p className="text-xs font-bold text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{errors.confirmPassword}</p>}
                   </div>
                 </div>
-
-                {/* Aceite de Regras e Termos */}
-                <div className="pt-4">
-                  <div className={`p-6 rounded-2xl border flex items-start gap-4 transition-all duration-300 ${
-                    formData.termAccepted ? "bg-emerald-50/40 border-emerald-100" : "bg-red-50/10 border-red-100/50"
-                  }`}>
-                    <input 
-                      type="checkbox"
-                      id="termAccepted"
-                      name="termAccepted"
-                      checked={formData.termAccepted}
-                      onChange={(e) => {
-                        setFormData(prev => ({ ...prev, termAccepted: e.target.checked }));
-                        if (errors.termAccepted) {
-                          setErrors(prev => {
-                            const next = { ...prev };
-                            delete next.termAccepted;
-                            return next;
-                          });
-                        }
-                      }}
-                      className="w-5 h-5 rounded border-brand-300 text-brand-600 focus:ring-brand-500/20 shrink-0 mt-0.5 cursor-pointer"
-                    />
-                    <label htmlFor="termAccepted" className="text-sm font-semibold text-slate-700 leading-relaxed cursor-pointer select-none">
-                      Declaro que li e aceito o <span className="text-brand-600 hover:underline">Termo de Sigilo e Responsabilidade</span> do sistema. *
-                      <span className="block text-xs font-medium text-slate-400 mt-1">Garantindo a confidencialidade e a ética no tratamento de dados sensíveis de todos os alunos cadastrados.</span>
-                    </label>
-                  </div>
-                  {errors.termAccepted && <p className="text-xs font-bold text-red-500 mt-2 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{errors.termAccepted}</p>}
-                </div>
               </div>
             )}
           </motion.div>
@@ -784,6 +963,78 @@ export default function NewTeacher() {
           )}
         </div>
       </div>
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-brand-50 relative animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-slate-900 mb-2">Exportar Relatório PDF</h3>
+            <p className="text-sm font-medium text-slate-500 mb-6">
+              Escolha se deseja exportar a ficha cadastral de um professor ou a listagem geral do sistema.
+            </p>
+
+            {/* Selection input for Ficha Individual */}
+            <div className="mb-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">
+                Selecionar Professor para Ficha:
+              </label>
+              <select
+                id="select-individual-teacher-export"
+                value={selectedIndividualTeacherId}
+                onChange={(e) => setSelectedIndividualTeacherId(e.target.value)}
+                className="w-full text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-brand-500/20"
+              >
+                <option value="current">
+                  {editingUser ? "Professor Atual (Editando):" : "Formulário de Cadastro Atual:"} {formData.name.trim() || "(Sem nome)"}
+                </option>
+                {teachersList.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} ({t.code || "Sem Matrícula"})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-4">
+              <button
+                id="btn-export-doc-individual"
+                onClick={handleExportIndividualTeacher}
+                className="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-brand-100 hover:border-brand-500 hover:bg-brand-50/50 cursor-pointer text-left transition-all"
+              >
+                <div>
+                  <p className="font-bold text-slate-800 text-sm">Ficha Individual</p>
+                  <p className="text-xs text-slate-400 font-medium mt-1">
+                    Exportar ficha cadastral do professor selecionado acima com dados pessoais e turmas.
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-400" />
+              </button>
+
+              <button
+                id="btn-export-doc-general"
+                onClick={handleExportAllTeachers}
+                className="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-brand-100 hover:border-brand-500 hover:bg-brand-50/50 cursor-pointer text-left transition-all"
+              >
+                <div>
+                  <p className="font-bold text-slate-800 text-sm">Relatório Geral (Todos)</p>
+                  <p className="text-xs text-slate-400 font-medium mt-1">Listagem completa de todos os docentes no sistema.</p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+
+            <div className="mt-8 flex justify-end">
+              <button
+                id="btn-close-export-modal"
+                onClick={() => setShowExportModal(false)}
+                className="px-5 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 font-semibold text-sm transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

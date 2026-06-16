@@ -1,18 +1,33 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
-import { BrainCircuit, Loader2, Sparkles, Mail, Lock, ArrowRight, BookOpen, CheckCircle2 } from "lucide-react";
-import { motion } from "motion/react";
+import { Bot, Loader2, Sparkles, Mail, Lock, ArrowRight, BookOpen, CheckCircle2, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import Logo from "../components/Logo";
+import TermsOfUseModal from "../components/TermsOfUseModal";
+import SecrecyTermsModal from "../components/SecrecyTermsModal";
 
 export default function Login() {
-  const [email, setEmail] = useState("admin@educaflow.com");
+  const [email, setEmail] = useState("admin@vicai.com");
   const [error, setError] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [acceptedSecrecy, setAcceptedSecrecy] = useState(false);
+  const [showSecrecyModal, setShowSecrecyModal] = useState(false);
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptedTerms) {
+      setError("Você precisa ler e aceitar os Termos de Uso e Política de Privacidade para acessar a plataforma.");
+      return;
+    }
+    if (!acceptedSecrecy) {
+      setError("Você precisa ler e aceitar o Termo de Sigilo e Responsabilidade para acessar a plataforma.");
+      return;
+    }
+    setError("");
     try {
       await login(email);
       navigate("/dashboard");
@@ -48,7 +63,7 @@ export default function Login() {
             <div className="relative z-10 mt-12 space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                  <BrainCircuit className="w-5 h-5 text-white" />
+                  <Bot className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-sm font-medium">Relatórios Gerados por IA</span>
               </div>
@@ -100,6 +115,59 @@ export default function Login() {
                 </div>
               </div>
 
+              {/* Checkbox de Termos de Uso e LGPD */}
+              <div className="bg-slate-50/70 p-4 border border-slate-100 rounded-2xl flex items-start gap-4 select-none">
+                <input 
+                  id="checkbox-terms"
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => {
+                    setAcceptedTerms(e.target.checked);
+                    if (e.target.checked && error.includes("Termos de Uso")) {
+                      setError("");
+                    }
+                  }}
+                  className="w-5 h-5 mt-0.5 rounded-lg border-slate-200 text-brand-600 focus:ring-brand-500 accent-brand-600 cursor-pointer"
+                />
+                <div className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  Declaro que li e concordo inteiramente com os{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="text-brand-650 hover:text-brand-700 font-bold hover:underline font-sans cursor-pointer bg-transparent inline-block p-0 outline-none text-left"
+                  >
+                    Termos de Uso e Diretrizes da LGPD da Vic IA
+                  </button>.
+                </div>
+              </div>
+
+              {/* Checkbox de Termo de Sigilo e Responsabilidade */}
+              <div className="bg-[#2c7a7a]/5 p-4 border border-[#2c7a7a]/15 rounded-2xl flex items-start gap-4 select-none">
+                <input 
+                  id="checkbox-secrecy"
+                  type="checkbox"
+                  checked={acceptedSecrecy}
+                  onChange={(e) => {
+                    setAcceptedSecrecy(e.target.checked);
+                    if (e.target.checked && error.includes("Termo de Sigilo")) {
+                      setError("");
+                    }
+                  }}
+                  className="w-5 h-5 mt-0.5 rounded-lg border-slate-200 text-[#2c7a7a] focus:ring-[#2c7a7a] accent-[#2c7a7a] cursor-pointer"
+                />
+                <div className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  Declaro que li e aceito o{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowSecrecyModal(true)}
+                    className="text-[#2c7a7a] hover:text-[#214343] font-bold hover:underline font-sans cursor-pointer bg-transparent inline-block p-0 outline-none text-left"
+                  >
+                    Termo de Sigilo e Responsabilidade
+                  </button>{" "}
+                  do sistema, garantindo a confidencialidade absoluta no tratamento de dados sensíveis de todos os alunos cadastrados.
+                </div>
+              </div>
+
               {error && <p className="text-red-500 text-xs font-medium bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
 
               <button 
@@ -133,7 +201,7 @@ export default function Login() {
                 <div className="flex gap-2 justify-center">
                   <button 
                     type="button"
-                    onClick={() => setEmail("admin@educaflow.com")}
+                    onClick={() => setEmail("admin@vicai.com")}
                     className="text-[10px] bg-white border border-brand-200 px-3 py-2 rounded-xl hover:bg-brand-50 transition-all font-bold text-brand-700 shadow-sm"
                   >
                     ADMIN
@@ -157,6 +225,34 @@ export default function Login() {
           © 2026 Vic AI - O Elo Gentil na Educação
         </p>
       </footer>
+
+      {/* Reusable TermsOfUseModal overlay popup with smooth presentation */}
+      <AnimatePresence>
+        {showTermsModal && (
+          <TermsOfUseModal
+            isOpen={showTermsModal}
+            onClose={() => setShowTermsModal(false)}
+            onAgree={() => {
+              setAcceptedTerms(true);
+              if (error.includes("Termos de Uso") || error.includes("precisa ler")) {
+                setError("");
+              }
+            }}
+          />
+        )}
+        {showSecrecyModal && (
+          <SecrecyTermsModal
+            isOpen={showSecrecyModal}
+            onClose={() => setShowSecrecyModal(false)}
+            onAgree={() => {
+              setAcceptedSecrecy(true);
+              if (error.includes("Termo de Sigilo") || error.includes("precisa ler")) {
+                setError("");
+              }
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

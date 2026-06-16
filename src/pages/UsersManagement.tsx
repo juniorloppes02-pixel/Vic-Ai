@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, UserType, School } from "../types";
-import { Plus, Search, Shield, User as UserIcon, MoreVertical, Edit3, Trash2 } from "lucide-react";
+import { Plus, Search, Shield, User as UserIcon, MoreVertical, Edit3, Trash2, FileDown } from "lucide-react";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function UsersManagement() {
   const navigate = useNavigate();
@@ -23,20 +25,86 @@ export default function UsersManagement() {
     });
   }, []);
 
+  const exportUsersToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "normal");
+    
+    // Title of the doc
+    doc.setFontSize(18);
+    doc.setTextColor(15, 23, 42); // slate-900
+    doc.text("Relatório de Usuários Cadastrados", 14, 22);
+    
+    // Subtitle / Meta information
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139); // slate-500
+    const currentDate = new Date().toLocaleDateString("pt-BR");
+    const currentTime = new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+    doc.text(`Gerado em: ${currentDate} às ${currentTime}`, 14, 29);
+    
+    const filteredUsers = users.filter(u => 
+      u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      u.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    const tableColumn = ["Nome", "E-mail", "Tipo", "Vínculo"];
+    const tableRows: string[][] = [];
+    
+    filteredUsers.forEach(user => {
+      const schoolName = user.schoolId 
+        ? (schools.find(s => s.id === user.schoolId)?.name || "Escola não encontrada") 
+        : "Secretaria Municipal";
+      
+      tableRows.push([
+        user.name,
+        user.email,
+        user.type || "",
+        schoolName
+      ]);
+    });
+    
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 36,
+      theme: "striped",
+      headStyles: { fillColor: [79, 70, 229], fontStyle: "bold" }, // branding blue/indigo
+      styles: { fontSize: 9, cellPadding: 4 },
+      columnStyles: {
+        0: { fontStyle: "bold", cellWidth: 50 },
+        1: { cellWidth: 60 },
+        2: { cellWidth: 35 },
+        3: { cellWidth: 45 }
+      }
+    });
+    
+    doc.save(`usuarios_cadastrados_${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl heading text-slate-900">Gestão de Usuários</h2>
           <p className="text-slate-500 font-medium mt-1">Controle de acesso para administradores e professores.</p>
         </div>
-        <button 
-          onClick={() => navigate("/teachers/new")}
-          className="primary flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Novo Usuário
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            id="btn-export-users-pdf"
+            onClick={exportUsersToPDF}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-colors shadow-sm"
+          >
+            <FileDown className="w-5 h-5 text-slate-500" />
+            Exportar PDF
+          </button>
+          <button 
+            id="btn-create-user"
+            onClick={() => navigate("/teachers/new")}
+            className="primary flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Novo Usuário
+          </button>
+        </div>
       </div>
 
       <div className="card-soft p-6 flex items-center gap-6">
@@ -78,10 +146,22 @@ export default function UsersManagement() {
                 </td>
                 <td className="px-8 py-5">
                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase flex items-center gap-1.5 w-fit ${
-                     user.type === UserType.ADMIN ? 'bg-purple-50 text-purple-600 border border-purple-100' : 'bg-brand-50 text-brand-600 border border-brand-100'
+                     user.type === UserType.ADMIN 
+                       ? 'bg-purple-50 text-purple-600 border border-purple-100' 
+                       : user.type === UserType.COORDENADOR
+                         ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                         : user.type === UserType.SECRETARIA
+                           ? 'bg-amber-50 text-amber-700 border border-amber-150'
+                           : 'bg-brand-50 text-brand-600 border border-brand-100'
                    }`}>
                       {user.type === UserType.ADMIN ? <Shield className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
-                      {user.type}
+                      {user.type === UserType.ADMIN 
+                        ? 'Administrador' 
+                        : user.type === UserType.COORDENADOR 
+                          ? 'Coordenador' 
+                          : user.type === UserType.SECRETARIA 
+                            ? 'Secretaria' 
+                            : 'Professor'}
                    </span>
                 </td>
                 <td className="px-8 py-5 text-sm font-medium text-slate-500">

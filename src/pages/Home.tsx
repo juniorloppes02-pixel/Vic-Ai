@@ -1,16 +1,51 @@
 import { 
   ArrowRight, 
-  BrainCircuit, 
+  Bot, 
   Users, 
   MessageSquare, 
   BarChart3, 
-  Menu
+  Menu,
+  MessageCircle,
+  Target,
+  Cpu,
+  Heart,
+  ShieldCheck,
+  Globe,
+  Sparkles,
+  ChevronRight
 } from "lucide-react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import Logo from "../components/Logo";
 
 export default function Home() {
+  useEffect(() => {
+    const handleScrollToHash = () => {
+      const hash = window.location.hash;
+      if (hash === "#about") {
+        const element = document.getElementById("about");
+        if (element) {
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: "smooth" });
+          }, 100);
+        }
+      } else if (hash === "#features") {
+        const element = document.getElementById("features");
+        if (element) {
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: "smooth" });
+          }, 100);
+        }
+      }
+    };
+
+    handleScrollToHash();
+
+    window.addEventListener("hashchange", handleScrollToHash);
+    return () => window.removeEventListener("hashchange", handleScrollToHash);
+  }, []);
+
   return (
     <div className="min-h-screen bg-brand-50 selection:bg-brand-100 selection:text-brand-900">
       {/* Navigation */}
@@ -102,7 +137,7 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
               <div className="md:col-span-8 bg-brand-50 p-12 rounded-[2rem] border border-brand-100 hover:border-brand-200 transition-all group">
-                <BrainCircuit className="w-12 h-12 text-brand-600 mb-8 transform group-hover:scale-110 transition-transform duration-300" />
+                <Bot className="w-12 h-12 text-brand-600 mb-8 transform group-hover:scale-110 transition-transform duration-300" />
                 <h3 className="text-2xl heading text-slate-900 mb-4">Gerador de Planos de Aula IA</h3>
                 <p className="text-slate-600 leading-relaxed text-lg font-medium">
                   Crie roteiros pedagógicos personalizados em segundos. Nossa IA entende as necessidades sensoriais e cognitivas específicas de cada aluno através do sistema Vic IA.
@@ -149,6 +184,122 @@ export default function Home() {
                 </div>
               </div>
             </div>
+
+            {/* Custom WhatsApp Contact Section styled after reference */}
+            <div className="mt-20 flex flex-col items-center justify-center text-center space-y-6 pt-12 border-t border-brand-100/50">
+              <div className="max-w-xl mx-auto">
+                <span className="text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-4 py-2 rounded-full border border-brand-100">
+                  Dúvidas ou Suporte?
+                </span>
+                <h3 className="text-3xl sm:text-4xl heading text-slate-900 mt-4 mb-3">
+                  Fale com a equipe da Vic AI
+                </h3>
+                <p className="text-slate-500 text-sm sm:text-base font-medium leading-relaxed mb-8">
+                  Nós ajudamos você a impulsionar o aprendizado especializado e a tirar o máximo proveito do sistema.
+                </p>
+                <div className="flex justify-center">
+                  <a 
+                    href="https://wa.me/5585921589258?text=Ol%C3%A1!%20Estou%20no%20site%20da%20Vic%20AI%20e%20gostaria%20de%20falar%20com%20um%20atendente."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-brand-600 text-white font-bold rounded-full py-4.5 px-9 inline-flex items-center gap-3.5 shadow-lg shadow-brand-600/20 hover:bg-brand-700 active:scale-95 transition-all text-base sm:text-lg border border-brand-700/10 cursor-pointer"
+                  >
+                    <MessageCircle className="w-6 h-6 fill-white text-white shrink-0" />
+                    <span>Fale Conosco no WhatsApp</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* About Section */}
+        <section id="about" className="bg-brand-50 py-32 border-b border-brand-100">
+          <div className="max-w-7xl mx-auto px-6 space-y-20">
+            {/* Header */}
+            <div className="text-center space-y-6 max-w-3xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-100 text-brand-800 rounded-full text-xs font-bold uppercase tracking-widest">
+                <Sparkles className="w-4 h-4 text-brand-600 animate-pulse" /> Nosso Propósito
+              </div>
+              <h2 className="text-5xl md:text-6xl heading tracking-tight text-slate-900 leading-tight">
+                Redefinindo a <span className="text-brand-600">Inclusão</span> <br />através da Inteligência.
+              </h2>
+              <p className="text-lg text-slate-500 font-medium leading-relaxed">
+                A Vic IA nasceu para apoiar educadores na jornada complexa e recompensadora de ensinar alunos com TEA e outras necessidades específicas.
+              </p>
+            </div>
+
+            {/* Inner Content Block */}
+            <div className="relative p-8 md:p-16 bg-white rounded-[3rem] shadow-xl shadow-brand-900/5 border border-brand-50 overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                <Cpu className="w-64 h-64 text-brand-600" />
+              </div>
+              
+              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6">
+                  <div className="w-16 h-16 bg-brand-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand-600/20">
+                    <Target className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-3xl heading text-slate-900 font-bold">Sobre a Vic IA</h3>
+                  <p className="text-slate-400 font-bold font-mono uppercase tracking-[0.2em] text-xs">O Elo Gentil na Educação</p>
+                </div>
+
+                <div className="lg:col-span-8 space-y-6 text-slate-600 font-medium leading-relaxed">
+                  <p>
+                    Nós nascemos com uma missão clara: transformar a educação inclusiva por meio da união entre tecnologia de ponta e o olhar humano. 
+                    Nosso sistema de Prontuário Pedagógico Inteligente não é apenas uma ferramenta de registro; é uma ponte que conecta educadores, famílias e especialistas.
+                  </p>
+                  <p>
+                    Em um cenário onde a neurodiversidade exige atenção personalizada, a Vic IA atua como uma assistente estratégica, utilizando inteligência artificial para analisar relatórios, identificar padrões de desenvolvimento e sugerir planos de aula que respeitam o tempo e a individualidade de cada aluno.
+                  </p>
+                  <p>
+                    Acreditamos que cada progresso, por menor que pareça, é uma grande vitória que merece ser celebrada and documentada. 
+                    <strong> Vic IA: Tecnologia que entende, educação que inclui.</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Core Values */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {/* Card 1 */}
+              <div className="p-8 bg-white rounded-3xl border border-slate-100 hover:border-brand-200 hover:shadow-lg transition-all group duration-300">
+                <div className="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm">
+                  <Cpu className="w-6 h-6" />
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 mb-2">Tecnologia de Ponta</h4>
+                <p className="text-sm text-slate-500 leading-relaxed font-semibold">IA avançada para análise preditiva e personalização pedagógica de alta fidelidade.</p>
+              </div>
+
+              {/* Card 2 */}
+              <div className="p-8 bg-white rounded-3xl border border-slate-100 hover:border-rose-200 hover:shadow-lg transition-all group duration-300">
+                <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm">
+                  <Heart className="w-6 h-6" />
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 mb-2">Olhar Humanizado</h4>
+                <p className="text-sm text-slate-500 leading-relaxed font-semibold">Foco centrado no bem-estar integral e no potencial inato de cada estudante.</p>
+              </div>
+
+              {/* Card 3 */}
+              <div className="p-8 bg-white rounded-3xl border border-slate-100 hover:border-sky-200 hover:shadow-lg transition-all group duration-300">
+                <div className="w-12 h-12 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm">
+                  <Users className="w-6 h-6" />
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 mb-2">Colaboração</h4>
+                <p className="text-sm text-slate-500 leading-relaxed font-semibold">Tecendo laços fortes e conectando a escola, a família e terapeutas em tempo real.</p>
+              </div>
+
+              {/* Card 4 */}
+              <div className="p-8 bg-white rounded-3xl border border-slate-100 hover:border-emerald-200 hover:shadow-lg transition-all group duration-300">
+                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 mb-2">Segurança de Dados</h4>
+                <p className="text-sm text-slate-500 leading-relaxed font-semibold">Proteção de nível institucional em total consonância com as normas da LGPD.</p>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -212,6 +363,22 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* Floating WhatsApp Button matching second attached image */}
+      <motion.a
+        href="https://wa.me/5585921589258?text=Ol%C3%A1!%20Conheci%20o%20sistema%20Vic%20AI%20e%20gostaria%20de%20falar%20com%20um%20atendente%20no%20suporte."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl shadow-emerald-500/30 transition-all border border-white/20 hover:scale-110 active:scale-95 group cursor-pointer"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 1, type: "spring", stiffness: 260, damping: 20 }}
+      >
+        <span className="absolute -top-10 right-0 bg-slate-900 text-white text-[10px] uppercase font-bold tracking-wider px-2.5 py-1.5 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-md">
+          WhatsApp Suporte
+        </span>
+        <MessageCircle className="w-7 h-7 fill-white text-white translate-y-[0.5px]" />
+      </motion.a>
     </div>
   );
 }

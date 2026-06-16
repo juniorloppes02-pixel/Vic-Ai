@@ -102,5 +102,5 @@ CREATE TABLE audit_logs (
 
 -- INSERIR USUÁRIO ADMIN PADRÃO
 INSERT INTO users (id, name, email, type) 
-VALUES (gen_random_uuid(), 'Administrador EducaFlow', 'admin@educaflow.com', 'ADMIN')
+VALUES (gen_random_uuid(), 'Administrador Vic IA', 'admin@vicai.com', 'ADMIN')
 ON CONFLICT (email) DO NOTHING;
